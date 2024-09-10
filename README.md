@@ -1,5 +1,5 @@
 # README.md
-# SQL Query Analyzer API
+# Advanced SQL Agent API
 
 This Flask-based API provides SQL query analysis and visualization services using LangChain and LangGraph.
 ## Prerequisites
