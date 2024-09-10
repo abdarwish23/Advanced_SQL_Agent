@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced SQL Agent Chatbot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+         :root {
+            --primary: #6a11cb;
+            --secondary: #c038ff;
+            --dark-purple: #4a0e95;
+            --background: #f4f7f9;
+            --text: #333333;
+            --light-text: #ffffff;
+            --border: #e1e4e8;
+            --third: #a047ff;
+            --bubble: #d9dddc;
+            --bubble2: #eee5f8;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .chat-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--dark-purple);
+            color: var(--light-text);
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .chat-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(196, 148, 19, 0.753);
+        }
+        
+        .chat-container {
+            width: 90%;
+            max-width: 800px;
+            height: 80vh;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--light-text);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .window-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .window-control {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+        
+        .window-control:hover {
+            opacity: 0.8;
+        }
+        
+        #minimize-btn {
+            background-color: #ffbd44;
+        }
+        
+        #maximize-btn {
+            background-color: #00ca4e;
+        }
+        
+        #close-btn {
+            background-color: #ff605c;
+        }
+        
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: var(--background);
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 18px;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease-out;
+            font-size: 16px;
+            line-height: 1.4;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .user-message {
+            background-color: var(--bubble2);
+            color: var(--text);
+            align-self: flex-end;
+            margin-left: auto;
+            border-bottom-right-radius: 0;
+        }
+        
+        .bot-message {
+            background-color: var(--bubble);
+            color: var(--text);
+            align-self: flex-start;
+            border-bottom-left-radius: 0;
+            border: 1px solid var(--border);
+        }
+        
+        .chat-input {
+            display: flex;
+            padding: 20px;
+            background-color: #ffffff;
+            border-top: 1px solid var(--border);
+        }
+        
+        #user-input {
+            flex-grow: 1;
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        
+        #user-input:focus {
+            border-color: var(--primary);
+        }
+        
+        #send-button {
+            padding: 15px 30px;
+            background-color: var(--primary);
+            color: var(--light-text);
+            border: none;
+            border-radius: 30px;
+            margin-left: 15px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        
+        #send-button:hover {
+            background-color: var(--secondary);
+        }
+        
+        .visualization-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .visualization {
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 5px;
+        }
+        
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .loading-text {
+            color: #777777;
+            margin-right: 15px;
+            font-size: 13px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 15px;
+            height: 15px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .chat-container.minimized {
+            height: 60px;
+            overflow: hidden;
+        }
+        
+        .chat-container.maximized {
+            width: 100%;
+            height: 100vh;
+            max-width: none;
+            border-radius: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <button class="chat-button" id="chat-button" onclick="toggleChat()">💬</button>
+    <div class="chat-container" id="chat-container">
+        <div class="chat-header">
+            <div class="window-controls">
+                <button id="minimize-btn" class="window-control" onclick="minimizeChat()"></button>
+                <button id="maximize-btn" class="window-control" onclick="maximizeChat()"></button>
+                <button id="close-btn" class="window-control" onclick="closeChat()"></button>
+            </div>
+            <div class="chat-title">Advanced SQL Agent</div>
+            <div style="width: 60px;"></div>
+            <!-- Spacer for alignment -->
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Ask a question about your data...">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const chatButton = document.getElementById('chat-button');
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+
+        function toggleChat() {
+            chatContainer.style.display = chatContainer.style.display === 'none' ? 'flex' : 'none';
+            chatButton.style.display = chatButton.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function minimizeChat() {
+            chatContainer.classList.toggle('minimized');
+        }
+
+        function maximizeChat() {
+            chatContainer.classList.toggle('maximized');
+        }
+
+        function closeChat() {
+            chatContainer.style.display = 'none';
+            chatButton.style.display = 'block';
+        }
+
+        function addMessage(message, isUser = false) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.classList.add(isUser ? 'user-message' : 'bot-message');
+            messageElement.textContent = message;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addVisualization(imageData, description) {
+            const visualizationContainer = document.createElement('div');
+            visualizationContainer.classList.add('visualization-container');
+
+            const visualizationElement = document.createElement('img');
+            visualizationElement.src = `data:image/png;base64,${imageData}`;
+            visualizationElement.alt = description;
+            visualizationElement.classList.add('visualization');
+
+            visualizationContainer.appendChild(visualizationElement);
+            chatMessages.appendChild(visualizationContainer);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addLoadingAnimation() {
+            const loadingElement = document.createElement('div');
+            loadingElement.classList.add('loading');
+            loadingElement.innerHTML = `
+                    <span class="loading-text">Analyzing your data...</span>
+                    <div class="loading-spinner"></div>
+                `;
+            chatMessages.appendChild(loadingElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return loadingElement;
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (message) {
+                addMessage(message, true);
+                userInput.value = '';
+
+                const loadingElement = addLoadingAnimation();
+
+                try {
+                    const response = await fetch('http://localhost:5000/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            query: message
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    loadingElement.remove();
+                    addMessage(data.summary);
+
+                    if (data.visualization && data.visualization.image) {
+                        addVisualization(data.visualization.image, data.visualization.description);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    loadingElement.remove();
+                    addMessage('Sorry, there was an error processing your request. Please try again.');
+                }
+            }
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Initialize chat as hidden
+        chatContainer.style.display = 'none';
+    </script>
+</body>
+
+</html>
