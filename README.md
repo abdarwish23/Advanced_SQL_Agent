@@ -1,7 +1,8 @@
 # README.md
 # Advanced SQL Agent API
 
-This Flask-based API provides SQL query analysis and visualization services using LangChain and LangGraph.
+This Flask-based API provides Advanced SQL query analysis and visualization services using LangChain and LangGraph.
+
 ## Prerequisites
 - Ensure you have Python 3.9 or higher installed
 - Make sure all required dependencies are installed
