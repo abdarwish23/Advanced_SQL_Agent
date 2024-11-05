@@ -3,6 +3,10 @@
 
 This Flask-based API provides Advanced SQL query analysis and visualization services using LangChain and LangGraph.
 
+
+
+![image](https://github.com/user-attachments/assets/cef48c8b-2129-4c27-b0c4-8bfd22e045ef)
+
 ## Prerequisites
 - Ensure you have Python 3.9 or higher installed
 - Make sure all required dependencies are installed
